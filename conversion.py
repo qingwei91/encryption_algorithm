@@ -16,7 +16,7 @@ def string_to_bin(s):
 
     # padding whitespace to end of string, so that length % 16 is 0    
     remainder_size = len(s) % char_per_block
-    for a in range(1, char_per_block - remainder_size):
+    for a in range(0, char_per_block - remainder_size):
         s = s + " "
     
     # convert each char into int
