@@ -48,17 +48,17 @@ sbox = {
         }
     }
 
-def rightHalf(arr):
+def leftHalf(arr):
     n = len(arr)    
     if n%2 == 1:
         raise ValueError("array length should be even")    
     return arr[:int(n/2)]
 
-def leftHalf(arr):
+def rightHalf(arr):
     n = len(arr)    
     if n%2 == 1:
         raise ValueError("array length should be even")    
-    return arr[int(n/2)-1:]
+    return arr[int(n/2):]
 
 def swapLeftRight(arr):
     """swap the right halves and left halves of arr"""
@@ -67,45 +67,62 @@ def swapLeftRight(arr):
         raise ValueError("array length should be even")    
     left = leftHalf(arr)
     right = rightHalf(arr)
-    return left.extend(right)
+    right.extend(left)      # move right to head of array
+    
+    return right
 
-def round_function(inputText, operation, key):
+def round_function(inputText, op, key):
     """
+    inputText is a full block, key is half block
     round function of feistel network
     operation should accept half of text and key
     """
     newLeft = rightHalf(inputText)
-    newRight = xor(operation(leftHalf(inputText), key), rightHalf(inputText))
+    newRight = xor(op(rightHalf(inputText), key), leftHalf(inputText))
     newLeft.extend(newRight)
     return newLeft
-    pass
 
 def xor(a, b):
     """a and b should be iterable of equal len"""
+    r = bitarray()
     for i,j in zip(a, b):
         if i!=j:
-            yield 1
+            r.append(True)
         else:
-            yield 0
+            r.append(False)
+    return r
             
 def key_generator(key, n):
-    """return a generator of keys in """
+    """
+    return a generator of keys in 
+    key size is hard-coded as 64 bit long
+    """
     random.seed(key)
+    key_max = math.pow(2, 64)
     for i in range(0, n):
-        k = random.randrange(0, 128, 1)
-        k = '{0:08b}'.format(k)
+        k = random.randrange(0, key_max, 1)
+        k = '{0:064b}'.format(k)
         yield bitarray(k)
         
-def feistel_network_flow(bittext, operation, iteration, keys):
+def feistel_network_flow(fullbittext, op, keys):
     """
+    number of keys indicate no of iterations
     flow can be used for encryption and decryption by reversing order of keys
     bittext is bitarray, operation is function(bittext, operation)
     """
-    intermediate = bittext  #initialize
-    for k in keys:
-        intermediate = round_function(intermediate, operation, k)
+    #intermediate = fullbittext #initialize
+    
+    datablocks = [fullbittext[x:x+128] for x in range(0, len(fullbittext), 128)]
+    result = bitarray()
+    intermediate = bitarray()
+    for block in datablocks:
+        intermediate = block
+        for k in keys:
+            intermediate = round_function(intermediate, op, k)
+        intermediate = swapLeftRight(intermediate)
+        result.extend(intermediate)
         
-    return swapLeftRight(intermediate)
+    return result
     
 def substitution1(text, key):
     """
@@ -115,6 +132,12 @@ def substitution1(text, key):
     3. if parity is even, sub only last 2 bit of each entry
     4. 
     """
+    if len(text)%4 != 0:
+        raise Exception("lenght should be multiple of 4")
+        
+    if len(text) != len(key):
+        raise Exception("key and text shud have equal length")
+    
     cipher = bitarray()
     n = len(text)   # should be 64
     parity = key.count(1)%1
@@ -133,14 +156,18 @@ def sboxlookup(text4bit, key4bit, odd):
     k = bitarray()
     t = bitarray()
     if odd:
-        k.append(key4bit[0]).append(key4bit[2])
-        t.append(text4bit[1]).append(text4bit[3])
+        k.append(key4bit[0])
+        k.append(key4bit[2])
+        t.append(text4bit[1])
+        t.append(text4bit[3])
     else:
-        k.append(key4bit[1]).append(key4bit[3])
-        t.append(text4bit[0]).append(text4bit[2])
+        k.append(key4bit[1])
+        k.append(key4bit[3])
+        t.append(text4bit[0])
+        t.append(text4bit[2])
         
     sub_str = sbox[k.to01()][t.to01()]
-    sub = bitarray(sub_str)    
+    sub = bitarray(sub_str) 
     
     return sub
 
@@ -180,3 +207,21 @@ def shift_arr(arr, n):
     l = arr[-n:]
     l.extend(arr[:-n])
     return l
+    
+def four_operation(text, key):
+    """this function is a combination of 4 operations"""
+    sub_text = substitution1(text, key)
+    perm_text = permutation1(sub_text, key)
+    
+    return perm_text
+    
+def encrypt(rawbit, key):
+    keys = list(key_generator(key, 10))
+    result = feistel_network_flow(rawbit, four_operation, keys)
+    return result
+    
+def decrypt(encryptedbit, key):
+    keys = list(key_generator(key, 10))
+    keys = keys[::-1]
+    result = feistel_network_flow(encryptedbit, four_operation, keys)
+    return result
