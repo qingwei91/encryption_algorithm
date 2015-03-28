@@ -114,6 +114,13 @@ class TestCryptography(unittest.TestCase):
         self.assertEqual(perm.count(), sa.count())
         pass
 
+    def test_matrix_op(self):
+        t = bitarray("010110001")
+        k = bitarray("000111001")
+        r = crypt.matrix_mul(t, k)
+        
+        self.assertEqual(r, bitarray("001110001"))
+
     def test_4op(self):
         s = ""
         k = ""

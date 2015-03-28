@@ -212,8 +212,35 @@ def four_operation(text, key):
     """this function is a combination of 4 operations"""
     sub_text = substitution1(text, key)
     perm_text = permutation1(sub_text, key)
+    mul_text = matrix_mul(perm_text, key)
+    shifted = shift_arr(mul_text, key.count())
+    return shifted
+
+def matrix_mul(bit, key):
+    """
+    convert both text and key into matrix and multiply
+    both bit and key must have length of x where x = y^2
+    in our case it is 64
+    """
+    n = len(bit)
+    no_of_row = int(math.sqrt(n))
+    start_of_rows = [x for x in range(0, n, no_of_row)]
+    result = bitarray(n)
+    for i in range(0, n):
+        r = math.floor(i/no_of_row)
+        c = i % no_of_row
+        rowA = bit[start_of_rows[r] : start_of_rows[r] + no_of_row]
+        colB = key[c : : no_of_row]
+        result[i] = odd_or_even(rowA, colB)
+    return result
     
-    return perm_text
+
+def odd_or_even(a, b):
+    """check if a and b combined have odd or even 1s"""
+    c = a.copy()
+    c.extend(b)
+    return c.count() % 2
+
     
 def encrypt(rawbit, key):
     keys = list(key_generator(key, 10))
