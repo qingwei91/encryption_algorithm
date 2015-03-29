@@ -9,22 +9,29 @@ import conversion
 import cryptography
 
 def main():
-    inputtext = input("Please enter string to be encrypt\n")
-    key = input("Please enter int as key\n")
+    inputtext = input("Please enter string to be encrypt : \n")
+    key = input("\nPlease enter int as key : \n")
     key = int(key)
     inputtextbit = conversion.string_to_bin(inputtext)
+
+    print("\nthis is the raw input string in binary form : ")
+    print(inputtextbit.to01())
     
     encryptedbit = cryptography.encrypt(inputtextbit, key)
-#    encryptedstr = conversion.bin_to_string(encryptedbit)
-#
-#    print("this is your encrypted message : " + encryptedstr)
-#    
-    key = input("Please reenter the key to decrypt\n")
+
+    print("\nthis is the encrypted string in binary : ")
+    print(encryptedbit.to01())
+    
+    key = input("Please reenter the key to decrypt : \n")
     key = int(key)
     decryptedbit = cryptography.decrypt(encryptedbit, key)
     decryptedstr = conversion.bin_to_string(decryptedbit)
+        
+    print("\nthis is the decrypted message in binary : ")
+    print(decryptedbit.to01())
     
-    print("this is the decrypted message: \n" + decryptedstr)
+    print("\nthis is the decrypted message :")
+    print(decryptedstr)
     
 if __name__ == '__main__':
     main()
