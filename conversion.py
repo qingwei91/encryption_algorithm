@@ -6,6 +6,8 @@ Created on Tue Mar 24 22:22:09 2015
 """
 import binascii
 from bitarray import bitarray
+import random
+import string
 
 block_size = 128
 size_per_char = 8
@@ -41,5 +43,10 @@ def bin_to_string(bit_arr):
         
 #    ascii_code = [int(bit_arr[i:i+8].tostring(), 2) for i in range(0, n, 8)]
 #    char_list = [chr(code) for code in ascii_code]
+    try:
+        s = bit_arr.tostring() 
+    except UnicodeDecodeError:
+        s = (''.join(random.choice(string.printable)
+            for _ in range(int(n/8))))
     
-    return bit_arr.tostring()
+    return s

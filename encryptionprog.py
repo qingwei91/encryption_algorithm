@@ -7,6 +7,19 @@ le main encryption script
 
 import conversion
 import cryptography
+import subprocess
+
+def str_from_file(path):
+    with open(path, 'r') as f:
+        data = f.read()
+    return data
+
+def str_to_file(path, s):
+    with open(path, 'w') as f:
+        f.write(s)
+
+def ls():
+    return subprocess.check_output(["ls"], universal_newlines=True)
 
 def main():
     inputtext = input("Please enter string to be encrypt : \n")

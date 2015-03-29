@@ -4,11 +4,12 @@ Created on Sun Mar 29 22:00:16 2015
 
 @author: qingwei
 """
-
 import conversion
 import cryptography
 import subprocess
 import re
+import random
+import string
 from bitarray import bitarray
 
 def str_from_file(path):
@@ -42,7 +43,10 @@ def decrypt():
     decrypted = cryptography.decrypt(s, key)
     
     decrypted_f = "decrypted_" + f
-    str_to_file(decrypted_f, decrypted.tostring())
+    
+    decrypted = conversion.bin_to_string(decrypted)
+    
+    str_to_file(decrypted_f, decrypted)
     
     print("\n Your cipher text is in " + decrypted_f)
     
