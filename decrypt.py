@@ -42,13 +42,13 @@ def decrypt():
     s = bitarray(s)
     decrypted = cryptography.decrypt(s, key)
     
-    decrypted_f = "decrypted_" + f
+    decrypted_f = "decrypted_" + re.subn('\Aencrypted_', "", f)[0]
     
     decrypted = conversion.bin_to_string(decrypted)
     
     str_to_file(decrypted_f, decrypted)
     
-    print("\n Your cipher text is in " + decrypted_f)
+    print("\nYour cipher text is in " + decrypted_f)
     
 if __name__ == '__main__':
     decrypt()
